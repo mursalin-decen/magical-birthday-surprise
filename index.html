@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday ✨</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;600&display=swap');
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000000; /* শুরুতে একদম পিচ ব্ল্যাক অন্ধকার */
+            font-family: 'Poppins', sans-serif;
+            color: #ffffff;
+        }
+
+        /* Ambient Dark/Neon Gradient Background (শুরুতে ইন-অ্যাক্টিভ থাকবে) */
+        .bg-gradient-neon {
+            background: radial-gradient(circle at center, #0a192f 0%, #020617 100%);
+            transition: background 5s ease-in-out;
+        }
+
+        .neon-glow-blue {
+            text-shadow: 0 0 12px rgba(56, 189, 248, 0.6), 0 0 25px rgba(56, 189, 248, 0.4);
+        }
+        
+        .neon-border-blue {
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.2), inset 0 0 15px rgba(56, 189, 248, 0.1);
+            border: 1px solid rgba(56, 189, 248, 0.4);
+        }
+
+        /* Neon Buttons styling */
+        .btn-neon {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.15);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(6px);
+        }
+
+        .btn-neon:hover {
+            border-color: #38bdf8;
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.5), inset 0 0 10px rgba(56, 189, 248, 0.25);
+            transform: translateY(-3px);
+            color: #38bdf8;
+        }
+
+        /* 3D Wall Hanging Sticker Text */
+        .wall-sticker {
+            font-family: 'Dancing Script', cursive;
+            transform: perspective(500px) rotateX(10deg);
+            filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.7));
+            animation: gentle-swing 5s ease-in-out infinite alternate;
+        }
+
+        @keyframes gentle-swing {
+            0% { transform: perspective(500px) rotateX(10deg) rotateZ(-1.5deg); }
+            100% { transform: perspective(500px) rotateX(10deg) rotateZ(1.5deg); }
+        }
+
+        /* Custom Floating Elements styling */
+        .balloon {
+            position: absolute;
+            bottom: -160px;
+            border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+            filter: drop-shadow(0 0 15px rgba(56, 189, 248, 0.3));
+        }
+
+        .balloon::after {
+            content: "";
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: 8px solid currentColor;
+        }
+
+        .balloon-pop {
+            animation: pop-flash 0.2s ease-out forwards;
+        }
+        @keyframes pop-flash {
+            0% { transform: scale(1); opacity: 1; filter: brightness(2); }
+            100% { transform: scale(1.6); opacity: 0; }
+        }
+
+        /* Automatic Stack Slide Mechanics */
+        .photo-container-stage {
+            position: relative;
+            width: 280px;
+            height: 360px;
+            perspective: 1000px;
+        }
+
+        .photo-card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            left: 0;
+            top: 0;
+            background: #090d16;
+            border-radius: 12px;
+            padding: 12px;
+            opacity: 0;
+            visibility: hidden;
+            transform-origin: center center;
+            transition: border-color 0.5s ease, box-shadow 0.5s ease;
+        }
+
+        /* Typewriter Cursor animation */
+        .cursor::after {
+            content: '|';
+            animation: blink 1.2s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body id="main-body" class="w-full h-full relative flex items-center justify-center select-none bg-black">
+
+    <div id="yt-player-container" class="absolute pointer-events-none opacity-0 w-1 h-1 overflow-hidden">
+        <div id="youtube-audio-player"></div>
+    </div>
+
+    <canvas id="particleCanvas" class="absolute top-0 left-0 w-full h-full pointer-events-none z-10"></canvas>
+
+    <main id="main-stage" class="w-full h-full absolute top-0 left-0 flex flex-col items-center justify-center p-4 z-20 transition-all duration-1000">
+        
+        <section id="step-1" class="step-view active flex flex-col items-center justify-center">
+            <button id="btn-magic" class="btn-neon text-white px-10 py-5 rounded-full text-lg tracking-wider font-semibold z-30">
+                Turn on the magic ✨
+            </button>
+        </section>
+
+        <section id="step-2" class="step-view hidden opacity-0 flex flex-col items-center justify-center">
+            <button id="btn-music" class="btn-neon text-white px-10 py-5 rounded-full text-lg tracking-wider font-semibold z-30">
+                <i class="fa-solid fa-music mr-2"></i> Play the music
+            </button>
+        </section>
+
+        <section id="step-3" class="step-view hidden opacity-0 flex flex-col items-center justify-center">
+            <button id="btn-decorate" class="btn-neon text-white px-10 py-5 rounded-full text-lg tracking-wider font-semibold z-30">
+                <i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Let's decorate
+            </button>
+        </section>
+
+        <div id="wall-decor" class="hidden opacity-0 text-center pointer-events-none my-2 z-20">
+            <h1 class="wall-sticker text-5xl md:text-6xl text-sky-400 neon-glow-blue font-bold tracking-wide">
+                Happy Birthday <br><span class="text-white text-4xl md:text-5xl font-sans tracking-normal mt-1 block">[Name]</span>
+            </h1>
+        </div>
+
+        <section id="step-4" class="step-view hidden opacity-0 w-full flex flex-col items-center justify-center">
+            
+            <div class="photo-container-stage my-4 flex items-center justify-center">
+                
+                <div class="photo-card neon-border-blue" data-index="0">
+                    <img src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&q=80" alt="Memory 1" class="w-full h-64 object-cover rounded-lg">
+                    <p class="text-center text-sm mt-3 text-sky-400 font-serif">Beautiful memories ✨</p>
+                </div>
+                
+                <div class="photo-card neon-border-blue" data-index="1">
+                    <img src="https://images.unsplash.com/photo-1513151233558-d860c5398176?w=400&q=80" alt="Memory 2" class="w-full h-64 object-cover rounded-lg">
+                    <p class="text-center text-sm mt-3 text-sky-400 font-serif">Pure happiness 💙</p>
+                </div>
+                
+                <div class="photo-card neon-border-blue" data-index="2">
+                    <img src="https://images.unsplash.com/photo-1464349172961-10442b37710e?w=400&q=80" alt="Memory 3" class="w-full h-64 object-cover rounded-lg">
+                    <p class="text-center text-sm mt-3 text-sky-400 font-serif">Smiling bright 🌙</p>
+                </div>
+                
+                <div class="photo-card neon-border-blue" data-index="3">
+                    <img src="https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=400&q=80" alt="Memory 4" class="w-full h-64 object-cover rounded-lg">
+                    <p class="text-center text-sm mt-3 text-sky-400 font-serif">Magical moments 🔮</p>
+                </div>
+                
+                <div class="photo-card neon-border-blue" data-index="4">
+                    <img src="https://images.unsplash.com/photo-1504196606672-aef5c9cefc92?w=400&q=80" alt="Memory 5" class="w-full h-64 object-cover rounded-lg">
+                    <p class="text-center text-sm mt-3 text-sky-400 font-serif">Unforgettable days 🌌</p>
+                </div>
+
+            </div>
+
+            <button id="btn-balloons" class="btn-neon text-white px-8 py-3 rounded-full tracking-wider mt-4 z-30 hidden opacity-0">
+                <i class="fa-solid fa-parachute-box mr-2"></i> I got you some balloons
+            </button>
+        </section>
+
+        <section id="step-5" class="step-view hidden opacity-0 flex flex-col items-center justify-center">
+            <button id="btn-cake-scene" class="btn-neon text-white px-10 py-4 rounded-full text-lg tracking-wider font-semibold z-30">
+                <i class="fa-solid fa-cake-candles mr-2"></i> Cake? Of course!
+            </button>
+        </section>
+
+        <section id="step-6" class="step-view hidden opacity-0 flex flex-col items-center justify-center relative w-full max-w-sm">
+            
+            <div id="neon-knife" class="absolute pointer-events-none z-40 opacity-0" style="left: -100px; top: 20px; transform: rotate(45deg);">
+                <svg width="60" height="180" viewBox="0 0 60 180" fill="none" xmlns="http://www.w3.org/2000/svg" class="drop-shadow-[0_0_12px_#38bdf8]">
+                    <path d="M25 10 L40 10 L40 120 L15 120 Q15 60 25 10 Z" fill="#e2e8f0" stroke="#38bdf8" stroke-width="2"/>
+                    <path d="M40 15 L40 115" stroke="#ffffff" stroke-width="2"/>
+                    <rect x="23" y="120" width="14" height="45" fill="#0f172a" stroke="#38bdf8" stroke-width="2" rx="3"/>
+                    <circle cx="30" cy="130" r="2" fill="#38bdf8"/>
+                    <circle cx="30" cy="145" r="2" fill="#38bdf8"/>
+                </svg>
+            </div>
+
+            <div id="cake-wrapper" class="w-64 h-64 flex items-center justify-center mb-8 relative">
+                <svg id="birthday-cake" viewBox="0 0 200 200" class="w-full h-full drop-shadow-[0_0_15px_rgba(56,189,248,0.2)]">
+                    <ellipse cx="100" cy="160" rx="80" ry="15" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+                    <path d="M35,120 C35,120 35,150 100,150 C165,150 165,120 165,120 L165,145 C165,145 165,155 100,155 C35,155 35,145 35,145 Z" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
+                    <path d="M40,90 L160,90 L160,130 C160,130 160,145 100,145 C40,145 40,130 40,130 Z" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
+                    <path d="M40,90 Q50,105 60,90 Q70,105 80,90 Q90,105 100,90 Q110,105 120,90 Q130,105 140,90 Q150,105 160,90 L160,100 Q150,115 140,100 Q130,115 120,100 Q110,115 100,100 Q90,115 80,100 Q70,115 60,100 Q50,115 40,100 Z" fill="#38bdf8" opacity="0.8"/>
+                    <line id="cake-slice" x1="100" y1="85" x2="100" y2="145" stroke="#ef4444" stroke-dasharray="4" stroke-width="2" class="hidden opacity-0"/>
+                    <rect id="candle" x="96" y="55" width="8" height="35" fill="#38bdf8" rx="2"/>
+                    <line x1="100" y1="55" x2="100" y2="48" stroke="#ffffff" stroke-width="2"/>
+                    <path id="candle-flame" d="M100,28 C105,38 105,48 100,48 C95,48 95,38 100,28 Z" fill="#f59e0b" filter="drop-shadow(0 0 8px #f59e0b)" class="hidden opacity-0 origin-bottom"/>
+                </svg>
+            </div>
+
+            <button id="btn-light-candle" class="btn-neon text-white px-8 py-3 rounded-full tracking-wider z-30">
+                <i class="fa-solid fa-fire mr-2"></i> Don't forget to light the candle
+            </button>
+            <button id="btn-cut-cake" class="btn-neon text-white px-8 py-3 rounded-full tracking-wider z-30 hidden opacity-0">
+                <i class="fa-solid fa-knife mr-2"></i> Cut the cake
+            </button>
+        </section>
+
+        <section id="step-10" class="step-view hidden opacity-0 w-full max-w-xl px-6 flex flex-col items-center justify-center">
+            <div class="w-full bg-slate-950/80 border border-sky-500/30 backdrop-blur-md rounded-2xl p-6 md:p-8 neon-border-blue min-h-[240px] flex items-center justify-center mb-8">
+                <p id="typewriter-textbox" class="text-lg md:text-xl text-sky-100 font-light leading-relaxed tracking-wide text-center cursor"></p>
+            </div>
+            <button id="btn-message" class="btn-neon text-white px-8 py-3 rounded-full tracking-wider z-30">
+                <i class="fa-solid fa-envelope-open-text mr-2"></i> A message for you
+            </button>
+        </section>
+
+        <div id="final-touch" class="hidden opacity-0 absolute inset-0 bg-black flex flex-col items-center justify-center z-50 transition-all duration-1000">
+            <h2 id="final-salutation" class="text-3xl md:text-5xl font-bold tracking-widest text-center px-4 font-serif text-sky-400 neon-glow-blue">
+                💖 Happy Birthday [Name] once again 💙
+            </h2>
+        </div>
+
+    </main>
+
+    <div id="balloon-container" class="absolute inset-0 w-full h-full pointer-events-none overflow-hidden z-15"></div>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+
+    <script>
+        // ==========================================
+        // CONFIGURATION & CUSTOM WORDS
+        // ==========================================
+        const CELEBRANT_NAME = "60s Love"; 
+        const LETTER_LINES = [
+            "Today is a very special day... ✨",
+            "A day the world became brighter because you were born.",
+            "I wanted to build something unique just to see you smile.",
+            "May your path ahead be illuminated with endless magic,",
+            "Filled with love, joy, and deep peaceful nights.",
+            "Thank you for being such an incredible presence. 💙",
+            "Click one last time to save the magic..."
+        ];
+
+        document.querySelectorAll('.wall-sticker span, #final-salutation').forEach(el => {
+            el.innerHTML = el.innerHTML.replace('[Name]', CELEBRANT_NAME);
+        });
+
+        // Global State & Elements Selection
+        let ytPlayer;
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        let stageOn = false;
+        let particles = [];
+        let systemType = 'fireflies';
+        let balloonInterval;
+        let carouselTimer;
+
+        // YouTube Iframe Engine Initializer
+        function onYouTubeIframeAPIReady() {
+            ytPlayer = new YT.Player('youtube-audio-player', {
+                height: '0',
+                width: '0',
+                videoId: 'YtLO9DZIkx0', 
+                playerVars: {
+                    'autoplay': 0,
+                    'controls': 0,
+                    'loop': 1,
+                    'playlist': 'YtLO9DZIkx0', 
+                    'modestbranding': 1,
+                    'rel': 0
+                }
+            });
+        }
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // ==========================================
+        // STEP TRANSITION ENGINE
+        // ==========================================
+        function transitionSteps(currentStepId, nextStepId, callback = null) {
+            const current = document.getElementById(currentStepId);
+            const next = document.getElementById(nextStepId);
+
+            gsap.to(current, {
+                opacity: 0, 
+                scale: 0.92, 
+                duration: 1.2, 
+                ease: "power2.inOut",
+                onComplete: () => {
+                    current.classList.add('hidden');
+                    current.classList.remove('active');
+                    
+                    next.classList.remove('hidden');
+                    next.classList.add('active');
+                    
+                    gsap.fromTo(next, 
+                        { opacity: 0, scale: 0.96 },
+                        { opacity: 1, scale: 1, duration: 1.5, ease: "power2.out", onComplete: callback }
+                    );
+                }
+            });
+        }
+
+        // ==========================================
+        // AUTOMATIC CAROUSEL SLIDESHOW PATTERN ENGINE
+        // ==========================================
+        let currentCardIndex = 0;
+        const totalCards = 5;
+
+        function startAutomaticCarousel() {
+            const cards = document.querySelectorAll('.photo-card');
+            
+            function showNextCard() {
+                cards.forEach((card, i) => {
+                    if (i === currentCardIndex) {
+                        card.classList.remove('hidden');
+                        gsap.killTweensOf(card);
+                        gsap.fromTo(card, 
+                            { opacity: 0, scale: 0.6, rotationY: -70, rotationZ: -10, z: -200, visibility: 'visible' },
+                            { opacity: 1, scale: 1, rotationY: 0, rotationZ: Math.random() * 4 - 2, z: 0, duration: 1.5, ease: "power3.out" }
+                        );
+                        card.style.zIndex = "30";
+                        card.style.boxShadow = "0 0 30px rgba(56, 189, 248, 0.6)";
+                        card.style.borderColor = "#38bdf8";
+                    } else if (i === (currentCardIndex + 1) % totalCards) {
+                        card.classList.remove('hidden');
+                        gsap.killTweensOf(card);
+                        gsap.to(card, {
+                            opacity: 0.4,
+                            scale: 0.85,
+                            rotationY: 35,
+                            rotationZ: 4,
+                            z: -100,
+                            x: 60,
+                            y: 10,
+                            duration: 1.5,
+                            ease: "power3.out",
+                            visibility: 'visible'
+                        });
+                        card.style.zIndex = "20";
+                        card.style.boxShadow = "none";
+                        card.style.borderColor = "rgba(56, 189, 248, 0.2)";
+                    } else {
+                        gsap.killTweensOf(card);
+                        gsap.to(card, {
+                            opacity: 0,
+                            scale: 0.6,
+                            duration: 1,
+                            onComplete: () => {
+                                if (i !== currentCardIndex && i !== (currentCardIndex + 1) % totalCards) {
+                                    card.style.visibility = 'hidden';
+                                }
+                            }
+                        });
+                    }
+                });
+
+                currentCardIndex = (currentCardIndex + 1) % totalCards;
+            }
+
+            showNextCard(); 
+            carouselTimer = setInterval(showNextCard, 4500); 
+
+            // ছবি আসার ৫ সেকেন্ড পর বাটনটি সুন্দরভাবে এনিমেট হয়ে আসবে
+            setTimeout(() => {
+                const balloonBtn = document.getElementById('btn-balloons');
+                balloonBtn.classList.remove('hidden');
+                gsap.fromTo(balloonBtn, 
+                    { opacity: 0, y: 20 }, 
+                    { opacity: 1, y: 0, duration: 1.5, ease: "power2.out" }
+                );
+            }, 5000); 
+        }
+
+        // ==========================================
+        // CANVAS PARTICLE SYSTEM ANIMATIONS
+        // ==========================================
+        class Particle {
+            constructor(type) {
+                this.type = type;
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height + (this.type === 'fireflies' ? 0 : -canvas.height);
+                this.size = this.type === 'fireflies' ? Math.random() * 3 + 1 : Math.random() * 6 + 4;
+                this.speedX = this.type === 'fireflies' ? (Math.random() - 0.5) * 0.4 : (Math.random() - 0.5) * 2;
+                this.speedY = this.type === 'fireflies' ? (Math.random() - 0.5) * 0.4 : Math.random() * 3 + 2;
+                this.color = this.type === 'fireflies' ? `rgba(56, 189, 248, ${Math.random() * 0.5 + 0.2})` : `hsl(${Math.random() * 40 + 190}, 85%, 65%)`;
+                this.angle = Math.random() * Math.PI * 2;
+                this.spin = (Math.random() - 0.5) * 0.04;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.type === 'fireflies') {
+                    this.angle += this.spin;
+                    this.x += Math.sin(this.angle) * 0.15;
+                }
+                if (this.y > canvas.height || this.x < 0 || this.x > canvas.width) {
+                    this.reset();
+                }
+            }
+            draw() {
+                ctx.beginPath();
+                if (this.type === 'fireflies') {
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fillStyle = this.color;
+                    ctx.shadowBlur = 8;
+                    ctx.shadowColor = "#38bdf8";
+                    ctx.fill();
+                } else {
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.angle);
+                    ctx.fillStyle = this.color;
+                    ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size);
+                    ctx.restore();
+                }
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        function initParticles(type, count) {
+            systemType = type;
+            particles = [];
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle(type));
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (stageOn && systemType !== 'quiet') {
+                particles.forEach(p => {
+                    p.update();
+                    p.draw();
+                });
+            }
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        // ==========================================
+        // BALLOON LAUNCH & POP MECHANICS
+        // ==========================================
+        function launchBalloons() {
+            const container = document.getElementById('balloon-container');
+            const colorPalette = ['#38bdf8', '#0ea5e9', '#0284c7', '#7dd3fc', '#bae6fd'];
+            const balloonCount = window.innerWidth < 768 ? 15 : 25;
+
+            for (let i = 0; i < balloonCount; i++) {
+                const b = document.createElement('div');
+                b.classList.add('balloon');
+                
+                const sizeWidth = Math.random() * 30 + 45; 
+                const sizeHeight = sizeWidth * 1.25;
+                const leftPos = Math.random() * 100;
+                const color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+                
+                b.style.width = `${sizeWidth}px`;
+                b.style.height = `${sizeHeight}px`;
+                b.style.left = `${leftPos}%`;
+                b.style.color = color;
+                b.style.background = `radial-gradient(circle at 30% 30%, #ffffff -50%, ${color} 70%)`;
+                
+                container.appendChild(b);
+
+                const duration = Math.random() * 5 + 8;
+                const delay = Math.random() * 4;
+
+                gsap.to(b, {
+                    bottom: '120%',
+                    x: `+=${Math.random() * 120 - 60}`,
+                    rotation: Math.random() * 30 - 15,
+                    duration: duration,
+                    delay: delay,
+                    ease: "power1.inOut",
+                    onComplete: () => b.remove()
+                });
+            }
+        }
+
+        function popAllBalloons() {
+            const activeBalloons = document.querySelectorAll('.balloon');
+            activeBalloons.forEach(b => {
+                gsap.killTweensOf(b);
+                b.classList.add('balloon-pop');
+                setTimeout(() => b.remove(), 200);
+            });
+        }
+
+        // ==========================================
+        // TEXT TYPEWRITER ENGINE (Relaxed Typing)
+        // ==========================================
+        let lineIndex = 0;
+        function renderTypewriterText() {
+            const box = document.getElementById('typewriter-textbox');
+            if (lineIndex < LETTER_LINES.length) {
+                const currentLine = LETTER_LINES[lineIndex];
+                let charIndex = 0;
+                box.innerHTML = "";
+                box.classList.add('cursor');
+
+                function typeChar() {
+                    if (charIndex < currentLine.length) {
+                        box.innerHTML += currentLine.charAt(charIndex);
+                        charIndex++;
+                        setTimeout(typeChar, 85);
+                    } else {
+                        box.classList.remove('cursor');
+                        lineIndex++;
+                        if(lineIndex < LETTER_LINES.length) {
+                            setTimeout(renderTypewriterText, 4000);
+                        }
+                    }
+                }
+                typeChar();
+            }
+        }
+
+        // ==========================================
+        // STEP SEQUENCING CONTROLLERS
+        // ==========================================
+
+        document.getElementById('btn-magic').addEventListener('click', () => {
+            stageOn = true;
+            initParticles('fireflies', 35);
+            
+            // বাটন ক্লিকের পর বডি ব্যাকগ্রাউন্ড খুব ধীরে ৪ সেকেন্ড ধরে অন্ধকার থেকে নেওন থিমে কনভার্ট হবে
+            const bodyEl = document.getElementById('main-body');
+            bodyEl.classList.remove('bg-black');
+            bodyEl.classList.add('bg-gradient-neon');
+
+            transitionSteps('step-1', 'step-2');
+        });
+
+        document.getElementById('btn-music').addEventListener('click', () => {
+            if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
+                ytPlayer.playVideo();
+            }
+            transitionSteps('step-2', 'step-3');
+        });
+
+        document.getElementById('btn-decorate').addEventListener('click', () => {
+            const wall = document.getElementById('wall-decor');
+            wall.classList.remove('hidden');
+            gsap.to(wall, { opacity: 1, scale: 1, duration: 1.8, ease: "back.out(1.2)" });
+            
+            transitionSteps('step-3', 'step-4', () => {
+                startAutomaticCarousel(); 
+            });
+        });
+
+        document.getElementById('btn-balloons').addEventListener('click', () => {
+            clearInterval(carouselTimer); 
+            launchBalloons();
+            balloonInterval = setInterval(launchBalloons, 8000);
+            transitionSteps('step-4', 'step-5', () => {
+                gsap.to('#wall-decor', { scale: 0.75, y: -15, duration: 1.5 });
+            });
+        });
+
+        document.getElementById('btn-cake-scene').addEventListener('click', () => {
+            transitionSteps('step-5', 'step-6');
+        });
+
+        document.getElementById('btn-light-candle').addEventListener('click', () => {
+            const flame = document.getElementById('candle-flame');
+            flame.classList.remove('hidden');
+            
+            gsap.fromTo(flame, { opacity: 0, scale: 0 }, { opacity: 1, scale: 1, duration: 0.8 });
+            gsap.to(flame, { scaleY: 1.15, scaleX: 0.9, duration: 0.3, repeat: -1, yoyo: true, ease: "sine.inOut" });
+            
+            gsap.to('body', { background: "radial-gradient(circle at center, #0f1c3f 0%, #020617 100%)", duration: 3 });
+            
+            gsap.to('#btn-light-candle', { opacity: 0, duration: 0.5, onComplete: () => {
+                document.getElementById('btn-light-candle').classList.add('hidden');
+                const cutBtn = document.getElementById('btn-cut-cake');
+                cutBtn.classList.remove('hidden');
+                gsap.to(cutBtn, { opacity: 1, duration: 0.5 });
+            }});
+        });
+
+        document.getElementById('btn-cut-cake').addEventListener('click', () => {
+            const knife = document.getElementById('neon-knife');
+            const sliceLine = document.getElementById('cake-slice');
+            
+            clearInterval(balloonInterval); 
+
+            gsap.timeline()
+                .to(knife, { opacity: 1, left: "50%", top: "-40px", rotation: -15, duration: 0.8, ease: "power2.out" })
+                .to(knife, { top: "60px", rotation: -45, duration: 0.4, ease: "power1.in" })
+                .call(() => {
+                    sliceLine.classList.remove('hidden');
+                    gsap.fromTo(sliceLine, { opacity: 0, height: 0 }, { opacity: 1, height: 65, duration: 0.3 });
+                    
+                    popAllBalloons(); 
+                    initParticles('confetti', 150); 
+                })
+                .to(knife, { left: "120%", top: "100px", opacity: 0, duration: 0.8, ease: "power2.in" })
+                .call(() => {
+                    setTimeout(() => {
+                        transitionSteps('step-6', 'step-10', () => {
+                            setTimeout(() => initParticles('fireflies', 25), 8000);
+                        });
+                    }, 4000);
+                });
+        });
+
+        document.getElementById('btn-message').addEventListener('click', (e) => {
+            e.currentTarget.classList.add('hidden');
+            renderTypewriterText();
+
+            const readingRunTime = (LETTER_LINES.length * 5500) + 4000; 
+            
+            setTimeout(() => {
+                const finalScreen = document.getElementById('final-touch');
+                finalScreen.classList.remove('hidden');
+                systemType = 'quiet';
+                
+                gsap.fromTo(finalScreen, { opacity: 0 }, {
+                    opacity: 1, 
+                    duration: 4, 
+                    onComplete: () => {
+                        if (ytPlayer && typeof ytPlayer.setVolume === 'function') {
+                            let currentVolume = 100;
+                            const fadeInterval = setInterval(() => {
+                                currentVolume -= 2; 
+                                if (currentVolume <= 0) {
+                                    clearInterval(fadeInterval);
+                                    ytPlayer.stopVideo();
+                                } else {
+                                    ytPlayer.setVolume(currentVolume);
+                                }
+                            }, 200);
+                        }
+                        gsap.to('#final-salutation', { opacity: 0, y: -15, duration: 4, delay: 5 });
+                    }
+                });
+            }, readingRunTime);
+        });
+
+    </script>
+</body>
+</html>
