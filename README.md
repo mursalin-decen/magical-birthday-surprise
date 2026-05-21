@@ -6,7 +6,7 @@ It takes the user through a step-by-step magical journey filled with music, ligh
 ---
 
 ## 🚀 Live Demo
-*(Once you host it on GitHub Pages, insert your live link here)*
+
 👉 [View Live Project](https://magical-birthday-surprise-19u1.vercel.app/)
 
 ---
